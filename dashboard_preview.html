@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Defense Metrics (GDM) 2025 - Dashboard Preview</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .header {
+            background: linear-gradient(90deg, #1B4F72 0%, #2874A6 100%);
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .header .subtitle {
+            color: #AED6F1;
+            font-size: 14px;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            padding: 20px 40px;
+            background: rgba(0,0,0,0.2);
+        }
+        .nav-tab {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .nav-tab:hover, .nav-tab.active {
+            background: #2874A6;
+            transform: translateY(-2px);
+        }
+        .dashboard {
+            padding: 30px 40px;
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        .cards-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: linear-gradient(135deg, #1B4F72 0%, #2874A6 100%);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .card-label {
+            font-size: 14px;
+            color: #AED6F1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .chart-container {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .chart-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #AED6F1;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        select {
+            padding: 12px 20px;
+            font-size: 14px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            margin-bottom: 20px;
+            min-width: 250px;
+        }
+        select option {
+            background: #1B4F72;
+            color: #fff;
+        }
+        .nation-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .metric-card {
+            background: rgba(255,255,255,0.08);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: #5DADE2;
+        }
+        .metric-label {
+            font-size: 12px;
+            color: #AED6F1;
+            margin-top: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        th {
+            background: rgba(40, 116, 166, 0.5);
+            color: #AED6F1;
+            font-weight: 600;
+        }
+        tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .coalition-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>🛡️ Global Defense Metrics</h1>
+            <div class="subtitle">2025 Military Power Analytics Platform</div>
+        </div>
+        <div style="color: #AED6F1;">144 Countries Analyzed</div>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="showPage('quickstats')">📊 Quick Stats</button>
+        <button class="nav-tab" onclick="showPage('nation')">🏛️ Nation Overview</button>
+        <button class="nav-tab" onclick="showPage('compare')">⚖️ Compare Powers</button>
+        <button class="nav-tab" onclick="showPage('coalition')">🤝 Coalition Builder</button>
+    </div>
+
+    <div class="dashboard">
+        <!-- Quick Stats Page -->
+        <div id="quickstats" class="page active">
+            <div class="cards-row">
+                <div class="card">
+                    <div class="card-value" id="totalBudget">$2.4T</div>
+                    <div class="card-label">Global Defense Budget</div>
+                </div>
+                <div class="card">
+                    <div class="card-value" id="totalAircraft">53,847</div>
+                    <div class="card-label">Total Aircraft</div>
+                </div>
+                <div class="card">
+                    <div class="card-value" id="totalPersonnel">27.4M</div>
+                    <div class="card-label">Active Personnel</div>
+                </div>
+                <div class="card">
+                    <div class="card-value">144</div>
+                    <div class="card-label">Countries Analyzed</div>
+                </div>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Top 10 Countries by Defense Budget</div>
+                    <div id="budgetChart"></div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Top 10 Countries by Military Aircraft</div>
+                    <div id="aircraftChart"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nation Overview Page -->
+        <div id="nation" class="page">
+            <select id="countrySelect" onchange="updateNationView()">
+                <option value="United States">United States</option>
+                <option value="Russia">Russia</option>
+                <option value="China">China</option>
+                <option value="India">India</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="France">France</option>
+                <option value="Japan">Japan</option>
+                <option value="South Korea">South Korea</option>
+                <option value="Germany">Germany</option>
+                <option value="Turkey">Turkey</option>
+            </select>
+            <div class="nation-grid" id="nationGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Compare Powers Page -->
+        <div id="compare" class="page">
+            <div class="chart-container">
+                <div class="chart-title">Defense Budget Comparison - Top 10</div>
+                <div id="compareChart"></div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">Military Strength Comparison</div>
+                <div id="radarChart"></div>
+            </div>
+        </div>
+
+        <!-- Coalition Builder Page -->
+        <div id="coalition" class="page">
+            <div class="chart-container">
+                <div class="chart-title">Select Coalition Members</div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                    <label style="cursor: pointer;"><input type="checkbox" class="coalition-cb" value="United States" checked> 🇺🇸 USA</label>
+                    <label style="cursor: pointer;"><input type="checkbox" class="coalition-cb" value="United Kingdom" checked> 🇬🇧 UK</label>
+                    <label style="cursor: pointer;"><input type="checkbox" class="coalition-cb" value="France" checked> 🇫🇷 France</label>
+                    <label style="cursor: pointer;"><input type="checkbox" class="coalition-cb" value="Germany"> 🇩🇪 Germany</label>
+                    <label style="cursor: pointer;"><input type="checkbox" class="coalition-cb" value="Japan"> 🇯🇵 Japan</label>
+                    <label style="cursor: pointer;"><input type="checkbox" class="coalition-cb" value="South Korea"> 🇰🇷 S. Korea</label>
+                    <label style="cursor: pointer;"><input type="checkbox" class="coalition-cb" value="Australia"> 🇦🇺 Australia</label>
+                    <label style="cursor: pointer;"><input type="checkbox" class="coalition-cb" value="Italy"> 🇮🇹 Italy</label>
+                </div>
+                <button onclick="updateCoalition()" style="padding: 10px 30px; background: #2874A6; border: none; color: white; border-radius: 5px; cursor: pointer;">Calculate Coalition Strength</button>
+            </div>
+            <div class="coalition-summary" id="coalitionSummary">
+                <div class="card">
+                    <div class="card-value" id="coalitionBudget">$1.1T</div>
+                    <div class="card-label">Coalition Budget</div>
+                </div>
+                <div class="card">
+                    <div class="card-value" id="coalitionAircraft">18,500</div>
+                    <div class="card-label">Total Aircraft</div>
+                </div>
+                <div class="card">
+                    <div class="card-value" id="coalitionPersonnel">2.1M</div>
+                    <div class="card-label">Personnel</div>
+                </div>
+                <div class="card">
+                    <div class="card-value" id="coalitionMembers">3</div>
+                    <div class="card-label">Members</div>
+                </div>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div id="coalitionPie"></div>
+                </div>
+                <div class="chart-container">
+                    <div id="coalitionBar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data (replace with actual data from CSV)
+        const countryData = {
+            "United States": { budget: 886000000000, aircraft: 13300, personnel: 1328000, tanks: 6209, naval: 484 },
+            "Russia": { budget: 86000000000, aircraft: 4255, personnel: 1330000, tanks: 12420, naval: 605 },
+            "China": { budget: 224000000000, aircraft: 3304, personnel: 2035000, tanks: 6000, naval: 777 },
+            "India": { budget: 74000000000, aircraft: 2296, personnel: 1455000, tanks: 4614, naval: 294 },
+            "United Kingdom": { budget: 75000000000, aircraft: 664, personnel: 194000, tanks: 227, naval: 117 },
+            "France": { budget: 56000000000, aircraft: 1055, personnel: 203000, tanks: 406, naval: 180 },
+            "Japan": { budget: 54000000000, aircraft: 1449, personnel: 247000, tanks: 1004, naval: 155 },
+            "South Korea": { budget: 46000000000, aircraft: 1595, personnel: 500000, tanks: 2624, naval: 234 },
+            "Germany": { budget: 56000000000, aircraft: 626, personnel: 184000, tanks: 266, naval: 80 },
+            "Turkey": { budget: 19000000000, aircraft: 1057, personnel: 355000, tanks: 3022, naval: 194 }
+        };
+
+        function formatNumber(num) {
+            if (num >= 1e12) return (num / 1e12).toFixed(1) + 'T';
+            if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            return num.toLocaleString();
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function createCharts() {
+            const countries = Object.keys(countryData);
+            const budgets = countries.map(c => countryData[c].budget);
+            const aircraft = countries.map(c => countryData[c].aircraft);
+
+            // Budget Chart
+            Plotly.newPlot('budgetChart', [{
+                x: budgets.slice(0, 10),
+                y: countries.slice(0, 10),
+                type: 'bar',
+                orientation: 'h',
+                marker: { color: '#2874A6' }
+            }], {
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#fff' },
+                margin: { l: 100, r: 20, t: 20, b: 40 },
+                xaxis: { title: 'Budget (USD)', gridcolor: 'rgba(255,255,255,0.1)' },
+                yaxis: { gridcolor: 'rgba(255,255,255,0.1)' }
+            });
+
+            // Aircraft Chart
+            Plotly.newPlot('aircraftChart', [{
+                x: aircraft.slice(0, 10),
+                y: countries.slice(0, 10),
+                type: 'bar',
+                orientation: 'h',
+                marker: { color: '#5DADE2' }
+            }], {
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#fff' },
+                margin: { l: 100, r: 20, t: 20, b: 40 },
+                xaxis: { title: 'Aircraft Count', gridcolor: 'rgba(255,255,255,0.1)' },
+                yaxis: { gridcolor: 'rgba(255,255,255,0.1)' }
+            });
+
+            // Compare Chart
+            Plotly.newPlot('compareChart', [{
+                x: countries.slice(0, 10),
+                y: budgets.slice(0, 10),
+                type: 'bar',
+                marker: { color: budgets.slice(0, 10).map((_, i) => `hsl(${200 + i * 10}, 70%, ${50 - i * 3}%)`) }
+            }], {
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#fff' },
+                margin: { l: 60, r: 20, t: 20, b: 80 }
+            });
+
+            // Radar Chart
+            const top5 = countries.slice(0, 5);
+            const traces = top5.map((country, i) => ({
+                type: 'scatterpolar',
+                r: [
+                    countryData[country].budget / 1e9,
+                    countryData[country].aircraft / 100,
+                    countryData[country].personnel / 10000,
+                    countryData[country].tanks / 100,
+                    countryData[country].naval / 10
+                ],
+                theta: ['Budget (B)', 'Aircraft', 'Personnel', 'Tanks', 'Naval'],
+                fill: 'toself',
+                name: country
+            }));
+
+            Plotly.newPlot('radarChart', traces, {
+                polar: { bgcolor: 'transparent', radialaxis: { visible: true, color: '#fff' } },
+                paper_bgcolor: 'transparent',
+                font: { color: '#fff' },
+                showlegend: true,
+                legend: { x: 1, y: 1 }
+            });
+
+            updateNationView();
+            updateCoalition();
+        }
+
+        function updateNationView() {
+            const country = document.getElementById('countrySelect').value;
+            const data = countryData[country];
+            
+            document.getElementById('nationGrid').innerHTML = `
+                <div class="metric-card">
+                    <div class="metric-value">$${formatNumber(data.budget)}</div>
+                    <div class="metric-label">Defense Budget</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${data.aircraft.toLocaleString()}</div>
+                    <div class="metric-label">Total Aircraft</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${formatNumber(data.personnel)}</div>
+                    <div class="metric-label">Active Personnel</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${data.tanks.toLocaleString()}</div>
+                    <div class="metric-label">Tanks</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${data.naval}</div>
+                    <div class="metric-label">Naval Vessels</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">#${Object.keys(countryData).indexOf(country) + 1}</div>
+                    <div class="metric-label">Global Rank</div>
+                </div>
+            `;
+        }
+
+        function updateCoalition() {
+            const selected = Array.from(document.querySelectorAll('.coalition-cb:checked')).map(cb => cb.value);
+            
+            let totalBudget = 0, totalAircraft = 0, totalPersonnel = 0;
+            const breakdown = [];
+            
+            selected.forEach(country => {
+                if (countryData[country]) {
+                    totalBudget += countryData[country].budget;
+                    totalAircraft += countryData[country].aircraft;
+                    totalPersonnel += countryData[country].personnel;
+                    breakdown.push({ country, budget: countryData[country].budget });
+                }
+            });
+
+            document.getElementById('coalitionBudget').textContent = '$' + formatNumber(totalBudget);
+            document.getElementById('coalitionAircraft').textContent = formatNumber(totalAircraft);
+            document.getElementById('coalitionPersonnel').textContent = formatNumber(totalPersonnel);
+            document.getElementById('coalitionMembers').textContent = selected.length;
+
+            // Pie chart
+            Plotly.newPlot('coalitionPie', [{
+                values: breakdown.map(b => b.budget),
+                labels: breakdown.map(b => b.country),
+                type: 'pie',
+                marker: { colors: ['#1B4F72', '#2874A6', '#3498DB', '#5DADE2', '#85C1E9', '#AED6F1'] }
+            }], {
+                paper_bgcolor: 'transparent',
+                font: { color: '#fff' },
+                title: { text: 'Budget Distribution', font: { color: '#AED6F1' } }
+            });
+
+            // Bar chart
+            Plotly.newPlot('coalitionBar', [{
+                x: breakdown.map(b => b.country),
+                y: breakdown.map(b => b.budget),
+                type: 'bar',
+                marker: { color: '#2874A6' }
+            }], {
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#fff' },
+                title: { text: 'Coalition Members', font: { color: '#AED6F1' } }
+            });
+        }
+
+        // Initialize
+        createCharts();
+    </script>
+</body>
+</html>
