@@ -101,7 +101,6 @@ def extract_numeric(value: str) -> Optional[float]:
             return None
     return None
 
-
 def normalize_personnel_value(value: str) -> Optional[float]:
     """Normalize military personnel counts."""
     return normalize_numeric_value(value)
